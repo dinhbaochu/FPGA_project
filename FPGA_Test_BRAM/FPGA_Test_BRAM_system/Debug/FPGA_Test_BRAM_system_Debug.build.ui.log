@@ -1,0 +1,10 @@
+2025-12-24T12:53:28.970435600255-12:53:28 **** Build of configuration Debug for project FPGA_Test_BRAM_system ****
+000-make all 
+000-Generating bif file for the system project
+000-generate_system_bif.bat 63783 C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/design_1_wrapper/export/design_1_wrapper/design_1_wrapper.xpfm domain_ps7_cortexa9_0 C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM_system/Debug/system.bif
+000-sdcard_gen --xpfm C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/design_1_wrapper/export/design_1_wrapper/design_1_wrapper.xpfm --sys_config design_1_wrapper --bif C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM_system/Debug/system.bif --bitstream C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM/_ide/bitstream/design_1_wrapper.bit --elf C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM/Debug/FPGA_Test_BRAM.elf,ps7_cortexa9_0
+000-creating BOOT.BIN using C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM/_ide/bitstream/design_1_wrapper.bit
+000-Running C:/Xilinx/Vitis/2020.1/bin/bootgen  -image C:/Users/linji/OneDrive/Desktop/Test/FPGA_project/FPGA_Test_BRAM/FPGA_Test_BRAM_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+00255-
+12:53:39 Build Finished (took 10s.874ms)
+
