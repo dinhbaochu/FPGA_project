@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include "platform.h"
+#include "xil_printf.h"
+#include "xparameters.h"
+#include "xgpio.h"
+#include "sleep.h"
+#include "xil_io.h"
+
+#define DDR_BASE_ADDR  0x00120000   // Safe DDR address
+#define DDR_MAX_COUNT  16
+
+XGpio gpio;
+
+void driverInit(void
+{
+    XGpio_Initialize(&gpio, XPAR_AXI_GPIO_0_DEVICE_ID);
+}
+
+void configGpio(void)
+{
+    XGpio_SetDataDirection(&gpio, 1, 0x0);   // LED: output
+    XGpio_SetDataDirection(&gpio, 2, 0xF);   // Button: input
+}
+
+int main()
+{
+    int pb_data;
+    u32 ddr_index = 0;
+    u32 ddr_value;
+
+    init_platform();
+
+    driverInit();
+    configGpio();
+
+    xil_printf("Button -> DDR -> UART demo\r\n");
+
+    while (1)
+    {
+        pb_data = XGpio_DiscreteRead(&gpio, 2);
+
+        // -----------------------------
+        // Store button value into DDR
+        // -----------------------------
+        if (ddr_index < DDR_MAX_COUNT) {
+            Xil_Out32(DDR_BASE_ADDR + ddr_index * 4, pb_data);
+            ddr_value = Xil_In32(DDR_BASE_ADDR + ddr_index * 4);
+
+            xil_printf("DDR[%d] = 0x%x\r\n", ddr_index, ddr_value);
+            ddr_index++;
+        }
+
+        // -----------------------------
+        // Original LED control logic
+        // -----------------------------
+        if (pb_data & 0x01)
+        {
+            XGpio_DiscreteSet(&gpio, 1, 0x55);
+            XGpio_DiscreteClear(&gpio, 1, 0xAA);
+            xil_printf("Pattern1 selected\r\n");
+        }
+        else if (pb_data & 0x02)
+        {
+            XGpio_DiscreteSet(&gpio, 1, 0xAA);
+            XGpio_DiscreteClear(&gpio, 1, 0x55);
+            xil_printf("Pattern2 selected\r\n");
+        }
+        else if (pb_data & 0x04)
+        {
+            xil_printf("Exit requested\r\n");
+            break;
+        }
+
+        usleep(1000000);
+    }
+
+    xil_printf("Exit from loop\r\n");
+
+    cleanup_platform();
+    return 0;
+}
