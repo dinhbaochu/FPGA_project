@@ -1,0 +1,48 @@
+2025-12-24T12:17:37.966907600255-12:17:37 **** Build of configuration Debug for project BRAM_Test ****
+000-make all 
+000-make --no-print-directory pre-build
+000-a9-linaro-pre-build-step
+000-' '
+000-make --no-print-directory main-build
+000-'Building file: ../src/helloworld.c'
+000-'Invoking: ARM v7 gcc compiler'
+000-arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/helloworld.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/helloworld.d" -MT"src/helloworld.o" -o "src/helloworld.o" "../src/helloworld.c"
+000/BRAM_Test/src/helloworld.c59-1-1"XPAR_BRAM_0_BASEADDR" redefined1-../src/helloworld.c:59: warning: "XPAR_BRAM_0_BASEADDR" redefined
+000-   59 | #define XPAR_BRAM_0_BASEADDR  XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
+000-      | 
+000-In file included from C:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include/xil_printf.h:12,
+000-                 from ../src/helloworld.c:50:
+000/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include/xparameters.h69-1-1this is the location of the previous definition0-C:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include/xparameters.h:69: note: this is the location of the previous definition
+000-   69 | #define XPAR_BRAM_0_BASEADDR 0x40000000U
+000-      | 
+000-../src/helloworld.c: In function 'main':
+000/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include/xparameters.h280-1-1unsigned conversion from 'int' to 'u16' {aka 'short unsigned int'} changes value from '1092616192' to '0' [-Woverflow]1-C:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include/xparameters.h:280:30: warning: unsigned conversion from 'int' to 'u16' {aka 'short unsigned int'} changes value from '1092616192' to '0' [-Woverflow]
+000-  280 | #define XPAR_GPIO_0_BASEADDR 0x41200000
+000-      |                              ^~~~~~~~~~
+000/BRAM_Test/src/helloworld.c76-1-1in expansion of macro 'XPAR_GPIO_0_BASEADDR'0-../src/helloworld.c:76:35: note: in expansion of macro 'XPAR_GPIO_0_BASEADDR'
+000-   76 |  Status = XGpio_Initialize(&Gpio, XPAR_GPIO_0_BASEADDR);
+000-      |                                   ^~~~~~~~~~~~~~~~~~~~
+000/BRAM_Test/src/helloworld.c122-1-1implicit declaration of function 'sleep' [-Wimplicit-function-declaration]1-../src/helloworld.c:122:3: warning: implicit declaration of function 'sleep' [-Wimplicit-function-declaration]
+000-  122 |   sleep(1);
+000-      |   ^~~~~
+000-'Finished building: ../src/helloworld.c'
+000-' '
+000-'Building file: ../src/platform.c'
+000-'Invoking: ARM v7 gcc compiler'
+000-arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/platform.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/platform.d" -MT"src/platform.o" -o "src/platform.o" "../src/platform.c"
+000-'Finished building: ../src/platform.c'
+000-' '
+000-'Building target: BRAM_Test.elf'
+000-'Invoking: ARM v7 gcc linker'
+000-arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -LC:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/sw/design_1_wrapper_1/domain_ps7_cortexa9_0/bsplib/lib -o "BRAM_Test.elf"  ./src/helloworld.o ./src/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+000-'Finished building target: BRAM_Test.elf'
+000-' '
+000-'Invoking: ARM v7 Print Size'
+000-arm-none-eabi-size BRAM_Test.elf  |tee "BRAM_Test.elf.size"
+000-   text	   data	    bss	    dec	    hex	filename
+000-  23644	   1232	  22584	  47460	   b964	BRAM_Test.elf
+000-'Finished building: BRAM_Test.elf.size'
+000-' '
+00255-
+12:17:43 Build Finished (took 5s.92ms)
+
