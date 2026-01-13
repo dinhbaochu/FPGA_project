@@ -1,124 +1,100 @@
-/******************************************************************************
-*
-* Copyright (C) 2009 - 2014 Xilinx, Inc.  All rights reserved.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* XILINX  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
-* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*
-* Except as contained in this notice, the name of the Xilinx shall not be used
-* in advertising or otherwise to promote the sale, use or other dealings in
-* this Software without prior written authorization from Xilinx.
-*
-******************************************************************************/
-
-/*
- * helloworld.c: simple test application
- *
- * This application configures UART 16550 to baud rate 9600.
- * PS7 UART (Zynq) is not initialized by this application, since
- * bootrom/bsp configures it to baud rate 115200
- *
- * ------------------------------------------------
- * | UART TYPE   BAUD RATE                        |
- * ------------------------------------------------
- *   uartns550   9600
- *   uartlite    Configurable only in HW design
- *   ps7_uart    115200 (configured by bootrom/bsp)
- */
-
 #include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
+#include "xparameters.h"
 #include "xgpio.h"
-#include "xbram.h"
+#include "sleep.h"
+#include "xil_io.h"
 
+/* -------------------- CONFIG -------------------- */
+#define BRAM_BASE_ADDR   XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
+#define BRAM_MAX_COUNT   256          // number of 32-bit words
+#define SAMPLE_DELAY_US  10000        // 10 ms
+#define RECORD_TIME_SEC  3
 
-#define LED_CHANNEL 1
-#define SWITCH_CHANNEL 2
-#define LEDS_MASK 0x0F   // 4 leds
-#define SWITCHES_MASK 0x0F   // 4 switches
-#define XPAR_BRAM_0_BASEADDR  XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
+#define LED_CHANNEL      1
+#define SWITCH_CHANNEL   2
+#define TRIGGER_MASK     0x01         // SW0
 
+/* -------------------- GLOBALS -------------------- */
+XGpio gpio;
 
+/* -------------------- FUNCTIONS -------------------- */
+void driverInit(void)
+{
+    int Status;
+    Status = XGpio_Initialize(&gpio, XPAR_AXI_GPIO_0_DEVICE_ID);
+    if (Status != XST_SUCCESS) {
+        xil_printf("GPIO init failed\r\n");
+        while (1);
+    }
+}
+
+void configGpio(void)
+{
+    XGpio_SetDataDirection(&gpio, LED_CHANNEL, 0x0);  // LEDs output
+    XGpio_SetDataDirection(&gpio, SWITCH_CHANNEL, 0xF); // switches input
+}
+
+/* -------------------- MAIN -------------------- */
 int main()
 {
-
+    u32 sw_data;
+    u32 bram_index = 0;
+    u32 i;
 
     init_platform();
+    driverInit();
+    configGpio();
 
-	XGpio Gpio; /* The Instance of the GPIO Driver */
-	XBram Bram;	/* The Instance of the BRAM Driver */
+    xil_printf("\r\n=== BRAM Triggered Recorder ===\r\n");
+    xil_printf("Press SW0 to record for 3 seconds\r\n");
 
-	XBram_Config *ConfigPtr;
+    while (1)
+    {
+        sw_data = XGpio_DiscreteRead(&gpio, SWITCH_CHANNEL);
 
-	int Status;
+        /* ---------- IDLE: wait for trigger ---------- */
+        if (sw_data & TRIGGER_MASK)
+        {
+            xil_printf("\r\nRecording started...\r\n");
+            bram_index = 0;
 
-	/* Initialize the GPIO driver */
-	Status = XGpio_Initialize(&Gpio, XPAR_GPIO_0_BASEADDR);
-	if (Status != XST_SUCCESS) {
-		xil_printf("Gpio Initialization Failed\r\n");
-		return XST_FAILURE;
-	}
+            /* ---------- RECORD PHASE (3 seconds) ---------- */
+            for (i = 0;
+                 i < (RECORD_TIME_SEC * 1000000 / SAMPLE_DELAY_US);
+                 i++)
+            {
+                if (bram_index < BRAM_MAX_COUNT)
+                {
+                    sw_data = XGpio_DiscreteRead(&gpio, SWITCH_CHANNEL);
+                    Xil_Out32(BRAM_BASE_ADDR + bram_index * 4, sw_data);
+                    bram_index++;
+                }
+                usleep(SAMPLE_DELAY_US);
+            }
 
+            xil_printf("Recording finished. Samples = %lu\r\n",
+                       (unsigned long)bram_index);
 
-	ConfigPtr = XBram_LookupConfig(XPAR_BRAM_0_DEVICE_ID);
-	if (ConfigPtr == (XBram_Config *) NULL) {
-		return XST_FAILURE;
-	}
+            /* ---------- READ BACK ---------- */
+            xil_printf("Dumping BRAM contents:\r\n");
+            for (i = 0; i < bram_index; i++)
+            {
+                u32 val = Xil_In32(BRAM_BASE_ADDR + i * 4);
+                xil_printf("BRAM[%03lu] = 0x%08lx\r\n",
+                           (unsigned long)i,
+                           (unsigned long)val);
+            }
 
-	Status = XBram_CfgInitialize(&Bram, ConfigPtr,
-				     ConfigPtr->CtrlBaseAddress);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+            xil_printf("Done. Release SW0 to re-arm.\r\n");
 
+            /* ---------- WAIT FOR BUTTON RELEASE ---------- */
+            while (XGpio_DiscreteRead(&gpio, SWITCH_CHANNEL) & TRIGGER_MASK);
+        }
 
-	/* Set the direction for all signals  */
-	XGpio_SetDataDirection(&Gpio, LED_CHANNEL, ~LEDS_MASK); // output
-	XGpio_SetDataDirection(&Gpio, SWITCH_CHANNEL, SWITCHES_MASK); // input
-
-
-    print("Hello World\n\r");
-
-    for (int i = 0; i < 16*4; i=i+4){
-    	XBram_WriteReg(XPAR_BRAM_0_BASEADDR,i,i);
-
+        usleep(100000);   // IDLE polling delay (100 ms)
     }
-
-    int out_data;
-
-    for (int i = 0; i < 16*4; i=i+4){
-    	out_data = XBram_ReadReg(XPAR_BRAM_0_BASEADDR,i);
-		xil_printf("%d: %d\n\r",i, out_data);
-
-    }
-
-    while(1){
-    	u32 switches = XGpio_DiscreteRead(&Gpio,SWITCH_CHANNEL);
-		XGpio_DiscreteWrite(&Gpio, LED_CHANNEL, switches);
-		xil_printf("checked! %x\n\r",switches);
-		sleep(1);
-    }
-
 
     cleanup_platform();
     return 0;

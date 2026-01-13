@@ -1,0 +1,10 @@
+2025-12-24T12:17:44.016413800255-12:17:44 **** Build of configuration Debug for project BRAM_Test_system ****
+000-make all 
+000-Generating bif file for the system project
+000-generate_system_bif.bat 53987 C:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/design_1_wrapper_1.xpfm domain_ps7_cortexa9_0 C:/Users/linji/FPGA_Test_DDR/BRAM_Test_system/Debug/system.bif
+000-sdcard_gen --xpfm C:/Users/linji/FPGA_Test_DDR/design_1_wrapper_1/export/design_1_wrapper_1/design_1_wrapper_1.xpfm --sys_config design_1_wrapper_1 --bif C:/Users/linji/FPGA_Test_DDR/BRAM_Test_system/Debug/system.bif --bitstream C:/Users/linji/FPGA_Test_DDR/BRAM_Test/_ide/bitstream/design_1_wrapper.bit --elf C:/Users/linji/FPGA_Test_DDR/BRAM_Test/Debug/BRAM_Test.elf,ps7_cortexa9_0
+000-creating BOOT.BIN using C:/Users/linji/FPGA_Test_DDR/BRAM_Test/_ide/bitstream/design_1_wrapper.bit
+000-Running C:/Xilinx/Vitis/2020.1/bin/bootgen  -image C:/Users/linji/FPGA_Test_DDR/BRAM_Test_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+00255-
+12:17:56 Build Finished (took 12s.759ms)
+
